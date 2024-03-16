@@ -47,6 +47,11 @@ android {
 }
 
 dependencies {
+    // Navigation Compose
+    implementation(libs.androidx.navigation.compose)
+
+    //DataStore Preferences
+    implementation(libs.androidx.datastore.preferences)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
