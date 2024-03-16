@@ -47,6 +47,9 @@ android {
 }
 
 dependencies {
+    // Splash API
+    implementation(libs.androidx.core.splashscreen)
+
     // Navigation Compose
     implementation(libs.androidx.navigation.compose)
 
