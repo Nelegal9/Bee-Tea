@@ -1,4 +1,4 @@
-package com.alekhin.beetea.onboarding.viewmodel
+package com.alekhin.beetea.splash.viewmodel
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
