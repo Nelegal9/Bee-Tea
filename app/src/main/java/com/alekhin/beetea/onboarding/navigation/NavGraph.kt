@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.alekhin.beetea.onboarding.screen.Greeting
+import com.alekhin.beetea.chat.screen.BluetoothScanScreen
 import com.alekhin.beetea.onboarding.screen.OnBoardingScreen
 
 @ExperimentalFoundationApi
@@ -24,7 +24,7 @@ fun SetupNavGraph(
             )
         }
         composable(route = Screen.Home.route) {
-            Greeting("Android")
+            BluetoothScanScreen()
         }
     }
 }
