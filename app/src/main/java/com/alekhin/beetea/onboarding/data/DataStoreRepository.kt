@@ -15,9 +15,7 @@ import java.io.IOException
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "on_boarding_pref")
 
 class DataStoreRepository(context: Context) {
-    private object PreferenceKey {
-        val onBoardingKey = booleanPreferencesKey(name = "on_boarding_completed")
-    }
+    private object PreferenceKey { val onBoardingKey = booleanPreferencesKey(name = "on_boarding_completed") }
 
     private val dataStore = context.dataStore
 
@@ -28,13 +26,11 @@ class DataStoreRepository(context: Context) {
     }
 
     fun readOnBoardingState(): Flow<Boolean> {
-        return dataStore.data
-            .catch { exception ->
+        return dataStore.data.catch { exception ->
                 if (exception is IOException) emit(emptyPreferences()) else throw exception
-            }
-            .map { preferences ->
-                val onBoardingState = preferences[PreferenceKey.onBoardingKey] ?: false
-                onBoardingState
-            }
+            }.map { preferences ->
+            val onBoardingState = preferences[PreferenceKey.onBoardingKey] ?: false
+            onBoardingState
+        }
     }
 }

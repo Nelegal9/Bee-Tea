@@ -18,8 +18,8 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.alekhin.beetea.onboarding.navigation.SetupNavGraph
-import com.alekhin.beetea.onboarding.viewmodel.viewModelFactory
-import com.alekhin.beetea.splash.viewmodel.SplashViewModel
+import com.alekhin.beetea.onboarding.presentation.viewmodel.viewModelFactory
+import com.alekhin.beetea.splash.presentation.viewmodel.SplashViewModel
 import com.alekhin.beetea.ui.theme.BeeTeaTheme
 
 @ExperimentalComposeUiApi
@@ -27,12 +27,8 @@ import com.alekhin.beetea.ui.theme.BeeTeaTheme
 class MainActivity : ComponentActivity() {
     lateinit var splashViewModel: SplashViewModel
 
-    private val bluetoothManager by lazy {
-        applicationContext.getSystemService(BluetoothManager::class.java)
-    }
-    private val bluetoothAdapter by lazy {
-        bluetoothManager?.adapter
-    }
+    private val bluetoothManager by lazy { applicationContext.getSystemService(BluetoothManager::class.java) }
+    private val bluetoothAdapter by lazy { bluetoothManager?.adapter }
 
     private val isBluetoothEnabled: Boolean
         get() = bluetoothAdapter?.isEnabled == true
@@ -62,11 +58,8 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             BeeTeaTheme {
-                splashViewModel = viewModel<SplashViewModel>(
-                    factory = viewModelFactory { SplashViewModel(MyApplication.mainModule.provideDataStoreRepository) }
-                )
+                splashViewModel = viewModel<SplashViewModel>(factory = viewModelFactory { SplashViewModel(BeeTeaApplication.onboardingModule.provideDataStoreRepository) })
                 val navController = rememberNavController()
-                // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                     SetupNavGraph(
                         navController = navController,

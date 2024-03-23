@@ -6,8 +6,8 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.alekhin.beetea.chat.screen.BluetoothScanScreen
-import com.alekhin.beetea.onboarding.screen.OnBoardingScreen
+import com.alekhin.beetea.chat.presentation.screen.BluetoothScanScreen
+import com.alekhin.beetea.onboarding.presentation.screen.OnBoardingScreen
 
 @ExperimentalComposeUiApi
 @ExperimentalFoundationApi
@@ -21,12 +21,8 @@ fun SetupNavGraph(
         startDestination = startDestination
     ) {
         composable(route = Screen.Welcome.route) {
-            OnBoardingScreen(
-                navController = navController
-            )
+            OnBoardingScreen(navController = navController)
         }
-        composable(route = Screen.Home.route) {
-            BluetoothScanScreen()
-        }
+        composable(route = Screen.Home.route) { BluetoothScanScreen() }
     }
 }
