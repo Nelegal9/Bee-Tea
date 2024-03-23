@@ -12,6 +12,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -21,6 +22,7 @@ import com.alekhin.beetea.onboarding.viewmodel.viewModelFactory
 import com.alekhin.beetea.splash.viewmodel.SplashViewModel
 import com.alekhin.beetea.ui.theme.BeeTeaTheme
 
+@ExperimentalComposeUiApi
 @ExperimentalFoundationApi
 class MainActivity : ComponentActivity() {
     lateinit var splashViewModel: SplashViewModel

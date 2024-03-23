@@ -20,6 +20,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -33,6 +34,7 @@ import com.alekhin.beetea.chat.BluetoothDevice
 import com.alekhin.beetea.chat.viewmodel.BluetoothViewModel
 import com.alekhin.beetea.onboarding.viewmodel.viewModelFactory
 
+@ExperimentalComposeUiApi
 @Composable
 fun BluetoothScanScreen(bluetoothViewModel: BluetoothViewModel = viewModel<BluetoothViewModel>(
     factory = viewModelFactory { BluetoothViewModel(MyApplication.bluetoothModule.provideBluetoothController) }
@@ -71,6 +73,10 @@ fun BluetoothScanScreen(bluetoothViewModel: BluetoothViewModel = viewModel<Bluet
                 CircularProgressIndicator()
                 Text(text = "Connecting...")
             }
+        }
+
+        state.isConnected -> {
+            BluetoothChatScreen()
         }
 
         else -> {

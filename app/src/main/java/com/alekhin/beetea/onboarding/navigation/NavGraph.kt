@@ -2,12 +2,14 @@ package com.alekhin.beetea.onboarding.navigation
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.alekhin.beetea.chat.screen.BluetoothScanScreen
 import com.alekhin.beetea.onboarding.screen.OnBoardingScreen
 
+@ExperimentalComposeUiApi
 @ExperimentalFoundationApi
 @Composable
 fun SetupNavGraph(
