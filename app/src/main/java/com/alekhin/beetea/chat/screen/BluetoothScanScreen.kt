@@ -1,5 +1,6 @@
 package com.alekhin.beetea.chat.screen
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,14 +12,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,26 +38,65 @@ fun BluetoothScanScreen(bluetoothViewModel: BluetoothViewModel = viewModel<Bluet
     factory = viewModelFactory { BluetoothViewModel(MyApplication.bluetoothModule.provideBluetoothController) }
 )) {
     val state by bluetoothViewModel.state.collectAsState()
+    val context = LocalContext.current
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        BluetoothDeviceList(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            pairedDevices = state.pairedDevices,
-            scannedDevices = state.scannedDevices
-        ) {
-            // TODO: Implement pairing and connecting to device.
+    LaunchedEffect(key1 = state.errorMessage) {
+        state.errorMessage?.let { message ->
+            Toast.makeText(
+                context,
+                message,
+                Toast.LENGTH_LONG
+            ).show()
         }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceAround
-        ) {
-            StartScanButton(modifier = Modifier) {
-                bluetoothViewModel.startScan()
+    }
+
+    // TEST
+    LaunchedEffect(key1 = state.isConnected) {
+        if (state.isConnected) {
+            Toast.makeText(
+                context,
+                "You're connected!",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+    // TEST
+
+    when {
+        state.isConnecting -> {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                CircularProgressIndicator()
+                Text(text = "Connecting...")
             }
-            StopScanButton(modifier = Modifier) {
-                bluetoothViewModel.stopScan()
+        }
+
+        else -> {
+            Column(modifier = Modifier.fillMaxSize()) {
+                BluetoothDeviceList(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    pairedDevices = state.pairedDevices,
+                    scannedDevices = state.scannedDevices,
+                    bluetoothViewModel = bluetoothViewModel
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    StartScanButton(modifier = Modifier) {
+                        bluetoothViewModel.startScan()
+                    }
+                    StopScanButton(modifier = Modifier) {
+                        bluetoothViewModel.stopScan()
+                    }
+                    StartServerButton(modifier = Modifier) {
+                        bluetoothViewModel.waitForIncomingConnections()
+                    }
+                }
             }
         }
     }
@@ -64,7 +107,7 @@ fun BluetoothDeviceList(
     modifier: Modifier,
     pairedDevices: List<BluetoothDevice>,
     scannedDevices: List<BluetoothDevice>,
-    onClick: (BluetoothDevice) -> Unit
+    bluetoothViewModel: BluetoothViewModel
 ) {
     LazyColumn(modifier = modifier) {
         item {
@@ -78,7 +121,7 @@ fun BluetoothDeviceList(
         items(pairedDevices) { device ->
             Text(
                 modifier = Modifier
-                    .clickable { onClick(device) }
+                    .clickable { bluetoothViewModel.connectToDevice(device) }
                     .fillMaxWidth()
                     .padding(16.dp),
                 text = device.name ?: "(No name)")
@@ -94,7 +137,7 @@ fun BluetoothDeviceList(
         items(scannedDevices) { device ->
             Text(
                 modifier = Modifier
-                    .clickable { onClick(device) }
+                    .clickable { bluetoothViewModel.connectToDevice(device) }
                     .fillMaxWidth()
                     .padding(16.dp),
                 text = device.name ?: "(No name)")
@@ -108,7 +151,7 @@ fun StartScanButton(
     onStartScan: () -> Unit
 ) {
     Row(
-        modifier = modifier.padding(40.dp),
+        modifier = modifier.padding(vertical = 40.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.Top
     ) {
@@ -129,7 +172,7 @@ fun StopScanButton(
     onStopScan: () -> Unit
 ) {
     Row(
-        modifier = modifier.padding(40.dp),
+        modifier = modifier.padding(vertical = 40.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.Top
     ) {
@@ -140,6 +183,27 @@ fun StopScanButton(
             )
         ) {
             Text(text = "Stop scan")
+        }
+    }
+}
+
+@Composable
+fun StartServerButton(
+    modifier: Modifier,
+    onStartServer: () -> Unit
+) {
+    Row(
+        modifier = modifier.padding(vertical = 40.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.Top
+    ) {
+        Button(
+            onClick = onStartServer,
+            colors = ButtonDefaults.buttonColors(
+                contentColor = Color.White
+            )
+        ) {
+            Text(text = "Start server")
         }
     }
 }
