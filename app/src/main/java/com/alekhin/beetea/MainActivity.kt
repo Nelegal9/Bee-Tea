@@ -1,8 +1,15 @@
 package com.alekhin.beetea
 
+import android.Manifest.permission.BLUETOOTH_CONNECT
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothAdapter.ACTION_REQUEST_ENABLE
+import android.bluetooth.BluetoothManager
+import android.content.Intent
+import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -16,8 +23,19 @@ import com.alekhin.beetea.ui.theme.BeeTeaTheme
 
 @ExperimentalMaterial3Api
 class MainActivity : ComponentActivity() {
+    private val bluetoothManager: BluetoothManager by lazy { getSystemService(BluetoothManager::class.java) }
+    private val bluetoothAdapter: BluetoothAdapter? by lazy { bluetoothManager.adapter }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (applicationContext.checkSelfPermission(BLUETOOTH_CONNECT) == PERMISSION_GRANTED) {
+            if (bluetoothAdapter?.isEnabled == false) {
+                val enableBtIntent = Intent(ACTION_REQUEST_ENABLE)
+                val enableBtLauncher = registerForActivityResult(StartActivityForResult()) { /* TODO: Handle ActivityResult. */ }
+                enableBtLauncher.launch(enableBtIntent)
+            }
+        }
+
         installSplashScreen()
         setContent {
             BeeTeaTheme {
