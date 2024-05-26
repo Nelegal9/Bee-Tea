@@ -76,6 +76,8 @@ class AndroidBluetoothController(private val context: Context) : BluetoothContro
 
     init { context.registerReceiver(stateReceiver, stateFilter) }
 
+    init { queryPairedDevices() }
+
     private fun hasPermission(permission: String): Boolean {
         return context.checkSelfPermission(permission) == PERMISSION_GRANTED
     }
