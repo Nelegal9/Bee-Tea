@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class BluetoothViewModel(private val bluetoothController: BluetoothController) : ViewModel() {
     private val _state = MutableStateFlow(BluetoothUiState())
@@ -23,7 +24,7 @@ class BluetoothViewModel(private val bluetoothController: BluetoothController) :
         bluetoothController.pairedDevices,
         bluetoothController.scannedDevices
     ) { state, pairedDevices, scannedDevices ->
-        state.copy(pairedDevices = pairedDevices, scannedDevices = scannedDevices)
+        state.copy(pairedDevices = pairedDevices, scannedDevices = scannedDevices, messages = if (state.connected) state.messages else emptyList())
     }.stateIn(viewModelScope, WhileSubscribed(3000), _state.value)
 
     private var deviceConnectionJob: Job? = null
@@ -57,10 +58,18 @@ class BluetoothViewModel(private val bluetoothController: BluetoothController) :
         _state.update { it.copy(roomName = "Unknown device", connecting = false, connected = false) }
     }
 
+    fun sendMessage(message: String) {
+        viewModelScope.launch {
+            val bluetoothMessage = bluetoothController.deliverMessage(message)
+            if (bluetoothMessage != null) _state.update { it.copy(messages = it.messages + bluetoothMessage) }
+        }
+    }
+
     private fun Flow<ConnectionResult>.listen(): Job {
         return onEach { result ->
             when(result) {
                 ConnectionResult.ConnectionEstablished -> { _state.update { it.copy(connected = true, connecting = false, error = null) } }
+                is ConnectionResult.TransferSucceeded -> { _state.update { it.copy(messages = it.messages + result.message) } }
                 is ConnectionResult.Error -> { _state.update { it.copy(connected = false, connecting = false, error = result.message) } }
             }
         }.catch {

@@ -17,4 +17,7 @@
     <string name="room">room</string>
     <string name="cancel">Cancel</string>
     <string name="connected">You\'re connected!</string>
+    <string name="close_room">Close room</string>
+    <string name="message_placeholder">Message</string>
+    <string name="send_message">Send message</string>
 </resources>

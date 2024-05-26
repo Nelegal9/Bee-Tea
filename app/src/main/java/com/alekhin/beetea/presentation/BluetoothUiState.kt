@@ -1,6 +1,7 @@
 package com.alekhin.beetea.presentation
 
 import com.alekhin.beetea.domain.BluetoothDomainDevice
+import com.alekhin.beetea.domain.BluetoothMessage
 
 data class BluetoothUiState(
     val pairedDevices: List<BluetoothDomainDevice> = emptyList(),
@@ -9,5 +10,6 @@ data class BluetoothUiState(
     val createdRoom: Boolean = false,
     val connecting: Boolean = false,
     val connected: Boolean = false,
+    val messages: List<BluetoothMessage> = emptyList(),
     val error: String? = null
 )

@@ -19,28 +19,37 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.alekhin.beetea.R.string.app_name
 import com.alekhin.beetea.R.string.connected
 import com.alekhin.beetea.R.string.create_room
+import com.alekhin.beetea.R.string.message_placeholder
 import com.alekhin.beetea.presentation.BluetoothViewModel
+import com.alekhin.beetea.presentation.components.ChatScreen
 import com.alekhin.beetea.presentation.components.ConnectScreen
 import com.alekhin.beetea.presentation.components.DeviceScreen
 import com.alekhin.beetea.presentation.components.PermissionDialog
@@ -70,6 +79,8 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
         setContent {
             val state by bluetoothViewModel.state.collectAsState()
+            val message = rememberSaveable { mutableStateOf("") }
+            val keyboardController = LocalSoftwareKeyboardController.current
 
             LaunchedEffect(key1 = state.connected) { if (state.connected) { makeText(applicationContext, connected, LENGTH_LONG).show() } }
             LaunchedEffect(key1 = state.error) { state.error?.let { message -> makeText(applicationContext, message, LENGTH_LONG).show() } }
@@ -77,14 +88,37 @@ class MainActivity : ComponentActivity() {
             BeeTeaTheme {
                 Scaffold(
                     topBar = { TopAppBar(title = { Text(text = stringResource(id = app_name)) }) },
-                    bottomBar = { /* TODO: Add bottom bar. */ },
+                    bottomBar = {
+                        if (state.connected) {
+                            Row(verticalAlignment = CenterVertically) {
+                                TextField(
+                                    value = message.value,
+                                    onValueChange = { message.value = it },
+                                    modifier = Modifier.padding(horizontal = 16.dp).weight(1.0f),
+                                    placeholder = { Text(text = stringResource(id = message_placeholder)) },
+                                    maxLines = 5
+                                )
+                                if (message.value.isNotBlank()) IconButton(onClick = {
+                                    val regex = "^\\s+|\\s+\$".toRegex()
+                                    bluetoothViewModel.sendMessage(message.value.replace(regex, ""))
+                                    message.value = ""
+                                    keyboardController?.hide()
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.Send,
+                                        contentDescription = stringResource(id = message_placeholder)
+                                    )
+                                }
+                            }
+                        }
+                    },
                     floatingActionButton = { if (!state.connecting && !state.connected) ExtendedFloatingActionButton(
                         text = { Text(text = stringResource(id = create_room)) },
                         icon = { Icon(imageVector = Icons.Default.Create, contentDescription = stringResource(id = create_room)) },
                         onClick = bluetoothViewModel::createRoom) }
                 ) { paddingValues ->
                     when {
-                        state.connected -> { Column(modifier = Modifier.padding(paddingValues)) { /* TODO: Add chat screen. */ } }
+                        state.connected -> { ChatScreen(modifier = Modifier.padding(paddingValues), roomName = (if (state.createdRoom) bluetoothAdapter?.name else state.roomName).toString(), state = state, onCloseRoomClick = bluetoothViewModel::disconnectFromDevice) }
                         state.connecting -> { ConnectScreen(createdRoom = state.createdRoom, state = state, onCancelClick = bluetoothViewModel::disconnectFromDevice) }
                         else -> {
                             DeviceScreen(modifier = Modifier.padding(paddingValues), state = state, onRefreshClick = bluetoothViewModel::refreshScan, onDeviceClick = bluetoothViewModel::connectToDevice)
