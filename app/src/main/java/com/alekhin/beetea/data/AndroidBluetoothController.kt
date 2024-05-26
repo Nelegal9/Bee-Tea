@@ -74,9 +74,10 @@ class AndroidBluetoothController(private val context: Context) : BluetoothContro
     private var serverSocket: BluetoothServerSocket? = null
     private var clientSocket: BluetoothSocket? = null
 
-    init { context.registerReceiver(stateReceiver, stateFilter) }
-
-    init { queryPairedDevices() }
+    init {
+        queryPairedDevices()
+        context.registerReceiver(stateReceiver, stateFilter)
+    }
 
     private fun hasPermission(permission: String): Boolean {
         return context.checkSelfPermission(permission) == PERMISSION_GRANTED
@@ -112,20 +113,13 @@ class AndroidBluetoothController(private val context: Context) : BluetoothContro
         return flow {
             if (!hasPermission(BLUETOOTH_CONNECT)) throw SecurityException("No BLUETOOTH_CONNECT permission")
             serverSocket = bluetoothAdapter?.listenUsingRfcommWithServiceRecord(SERVICE_NAME, fromString(SERVICE_UUID))
-            var shouldLoop = true
-            while (shouldLoop) {
-                clientSocket = try { serverSocket?.accept() } catch (e: IOException) {
-                    shouldLoop = false
-                    null
-                }
-
+                clientSocket = try { serverSocket?.accept() } catch (e: IOException) { null }
                 emit(ConnectionResult.ConnectionEstablished)
                 clientSocket?.let {
                     serverSocket?.close()
                     if (clientSocket?.isConnected == false) return@flow
                     while (true) { /* TODO: Manage connected socket. */ }
                 }
-            }
         }.onCompletion { closeConnection() }.flowOn(IO)
     }
 
