@@ -20,11 +20,16 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.alekhin.beetea.R.string.app_name
+import com.alekhin.beetea.presentation.BluetoothViewModel
+import com.alekhin.beetea.presentation.components.DeviceScreen
 import com.alekhin.beetea.presentation.components.PermissionDialog
 import com.alekhin.beetea.ui.theme.BeeTeaTheme
 
@@ -36,9 +41,12 @@ class MainActivity : ComponentActivity() {
     private val permissionsToRequest = arrayOf(BLUETOOTH_SCAN, BLUETOOTH_ADVERTISE, BLUETOOTH_CONNECT)
     private val permissionDialogQueue = mutableStateListOf<String>()
 
+    private val bluetoothViewModel: BluetoothViewModel = BluetoothViewModel(BeeTeaApplication.bluetoothAppModule.provideBluetoothController)
+    private var bluetoothAdapterState = mutableStateOf(false)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val enableBtLauncher = registerForActivityResult(StartActivityForResult()) { /* TODO: Handle ActivityResult. */ }
+        val enableBtLauncher = registerForActivityResult(StartActivityForResult()) { if (bluetoothAdapter?.isEnabled == true) bluetoothAdapterState.value = true }
         val enablePermsLauncher = registerForActivityResult(RequestMultiplePermissions()) { perms ->
             if (perms[BLUETOOTH_CONNECT] == false && !permissionDialogQueue.contains(BLUETOOTH_CONNECT)) permissionDialogQueue.add(BLUETOOTH_CONNECT)
             if (perms[BLUETOOTH_CONNECT] == true) if (bluetoothAdapter?.isEnabled == false) enableBtLauncher.launch(Intent(ACTION_REQUEST_ENABLE))
@@ -46,13 +54,16 @@ class MainActivity : ComponentActivity() {
 
         installSplashScreen()
         setContent {
+            val state by bluetoothViewModel.state.collectAsState()
+
             BeeTeaTheme {
                 Scaffold(
                     topBar = { TopAppBar(title = { Text(text = stringResource(id = app_name)) }) },
                     bottomBar = { /* TODO: Add bottom bar. */ },
                     floatingActionButton = { /* TODO: Add extended floating action button. */  }
                 ) { paddingValues ->
-                    Text(text = stringResource(id = app_name), modifier = Modifier.padding(paddingValues))
+                    DeviceScreen(modifier = Modifier.padding(paddingValues), state = state, onRefreshClick = bluetoothViewModel::refreshScan, onDeviceClick = { /* TODO: Add onDeviceClick. */ })
+                    if (bluetoothAdapter?.isEnabled == true || bluetoothAdapterState.value) bluetoothViewModel.scanDevices()
                 }
 
                 permissionDialogQueue.reversed().forEach { permission ->

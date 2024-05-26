@@ -6,4 +6,9 @@
     <string name="permission_requirement_declined_description">It seems you\'ve permanently declined nearby devices permission. Visit app settings to manually allow this permission</string>
     <string name="ok">OK</string>
     <string name="visit_app_settings">Visit app settings</string>
+    <string name="available_devices">AVAILABLE DEVICES</string>
+    <string name="refresh_devices">Refresh devices</string>
+    <string name="paired_devices">Paired devices</string>
+    <string name="scanned_devices">Scanned devices</string>
+    <string name="unknown_device">Unknown device</string>
 </resources>
