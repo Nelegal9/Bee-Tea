@@ -42,7 +42,7 @@ class MainActivity : ComponentActivity() {
     private val permissionDialogQueue = mutableStateListOf<String>()
 
     private val bluetoothViewModel: BluetoothViewModel = BluetoothViewModel(BeeTeaApplication.bluetoothAppModule.provideBluetoothController)
-    private var bluetoothAdapterState = mutableStateOf(false)
+    private val bluetoothAdapterState = mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
