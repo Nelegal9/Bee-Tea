@@ -1,6 +1,8 @@
 package com.alekhin.beetea
 
+import android.Manifest.permission.BLUETOOTH_ADVERTISE
 import android.Manifest.permission.BLUETOOTH_CONNECT
+import android.Manifest.permission.BLUETOOTH_SCAN
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothAdapter.ACTION_REQUEST_ENABLE
@@ -11,7 +13,7 @@ import android.os.Bundle
 import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
+import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,15 +33,16 @@ class MainActivity : ComponentActivity() {
     private val bluetoothManager: BluetoothManager by lazy { getSystemService(BluetoothManager::class.java) }
     private val bluetoothAdapter: BluetoothAdapter? by lazy { bluetoothManager.adapter }
 
+    private val permissionsToRequest = arrayOf(BLUETOOTH_SCAN, BLUETOOTH_ADVERTISE, BLUETOOTH_CONNECT)
     private val permissionDialogQueue = mutableStateListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val enableBtLauncher = registerForActivityResult(StartActivityForResult()) { /* TODO: Handle ActivityResult. */ }
-        val enablePermLauncher = registerForActivityResult(RequestPermission()) { granted ->
-            if (!granted && !permissionDialogQueue.contains(BLUETOOTH_CONNECT)) permissionDialogQueue.add(BLUETOOTH_CONNECT)
-            if (granted) if (bluetoothAdapter?.isEnabled == false) enableBtLauncher.launch(Intent(ACTION_REQUEST_ENABLE))
-        }.also { it.launch(BLUETOOTH_CONNECT) }
+        val enablePermsLauncher = registerForActivityResult(RequestMultiplePermissions()) { perms ->
+            if (perms[BLUETOOTH_CONNECT] == false && !permissionDialogQueue.contains(BLUETOOTH_CONNECT)) permissionDialogQueue.add(BLUETOOTH_CONNECT)
+            if (perms[BLUETOOTH_CONNECT] == true) if (bluetoothAdapter?.isEnabled == false) enableBtLauncher.launch(Intent(ACTION_REQUEST_ENABLE))
+        }.also { it.launch(permissionsToRequest) }
 
         installSplashScreen()
         setContent {
@@ -58,7 +61,7 @@ class MainActivity : ComponentActivity() {
                         onDismiss = { permissionDialogQueue.removeFirst() },
                         onOkClick = {
                             permissionDialogQueue.removeFirst()
-                            enablePermLauncher.launch(BLUETOOTH_CONNECT)
+                            enablePermsLauncher.launch(permissionsToRequest)
                         },
                         onVisitAppSettingsClick = ::openAppSettings
                     )
