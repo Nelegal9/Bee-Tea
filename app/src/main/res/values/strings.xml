@@ -11,4 +11,10 @@
     <string name="paired_devices">Paired devices</string>
     <string name="scanned_devices">Scanned devices</string>
     <string name="unknown_device">Unknown device</string>
+    <string name="create_room">Create room</string>
+    <string name="waiting">Waiting for incoming connections…</string>
+    <string name="connecting">Connecting to</string>
+    <string name="room">room</string>
+    <string name="cancel">Cancel</string>
+    <string name="connected">You\'re connected!</string>
 </resources>
