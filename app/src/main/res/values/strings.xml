@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Bee Tea</string>
+    <string name="permission_required">Nearby devices permission required</string>
+    <string name="request_permission">Request permission</string>
+    <string name="permission_requirement_description">This app needs access to nearby devices permission to find, connect to, and determine the relative position of devices</string>
+    <string name="permission_requirement_declined_description">It seems you\'ve permanently declined nearby devices permission. Visit app settings to manually allow this permission</string>
+    <string name="ok">OK</string>
+    <string name="visit_app_settings">Visit app settings</string>
 </resources>
